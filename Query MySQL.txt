@@ -1,0 +1,259 @@
+SELECT 
+mobil.merk AS "Merk", 
+tipe_mobil.type_mobil AS "Jenis mobil", 
+transaksi.tanggal_sewa AS "Tgl sewa", 
+transaksi.tanggal_pengembalian AS "Tgl pengambilan", 
+penyewa.nama_penyewa AS "Penyewa", 
+penyewa.nik AS "KTP", 
+penyewa.no_hp AS "No. hp" 
+
+FROM mobil, tipe_mobil, transaksi, penyewa 
+
+WHERE 
+mobil.id_type = tipe_mobil.id_type AND 
+transaksi.id_mobil = mobil.id_mobil AND 
+transaksi.nik = penyewa.nik;
+
+-----------------------------------------------
+
+Menampilkan data sesuai tanggal yang dipilih
+
+SELECT 
+mobil.merk AS "Merk", 
+tipe_mobil.type_mobil AS "Jenis mobil", 
+transaksi.tanggal_sewa AS "Tgl sewa", 
+transaksi.tanggal_pengembalian AS "Tgl pengambilan", 
+penyewa.nama_penyewa AS "Penyewa", 
+penyewa.nik AS "KTP", 
+penyewa.no_hp AS "No. hp" 
+
+FROM mobil, tipe_mobil, transaksi, penyewa 
+
+WHERE 
+mobil.id_type = tipe_mobil.id_type AND 
+transaksi.id_mobil = mobil.id_mobil AND 
+transaksi.nik = penyewa.nik AND
+transaksi.tanggal_sewa >= '2022-10-20'AND
+transaksi.tanggal_sewa <= '2022-10-30';
+
+------------------------------------------------
+
+Historical 
+
+SELECT
+pembeli.nama_pembeli AS "nama_pembeli",
+barang.nama_barang AS "barang",
+transaksi.jumlah_barang AS "jumlah",
+history.harga * transaksi.jumlah_barang AS "total"
+
+FROM barang, history, pembeli, transaksi
+
+WHERE
+pembeli.id_pembeli = transaksi.id_pembeli AND
+barang.id_barang = transaksi.id_barang AND
+history.id_barang = barang.id_barang;
+
+-----------------------------------------------
+
+
+Historical p2
+
+SELECT
+c.nama_pembeli AS "nama_pembeli",
+a.nama_barang AS "barang",
+d.jumlah_barang AS "jumlah",
+b.harga * d.jumlah_barang AS "total"
+
+FROM barang a, history b, pembeli c, transaksi d
+
+WHERE
+c.id_pembeli = d.id_pembeli AND
+a.id_barang = d.id_barang AND
+b.id_barang = a.id_barang;
+
+=====================================================
+
+INNER JOIN Query
+
+SELECT 
+bagan_akun.kode,
+bagan_akun.nama_akun,
+jurnal2019.debet,
+jurnal2019.kredit
+
+FROM bagan_akun INNER JOIN jurnal2019 ON bagan_akun.kode = jurnal2019.kode_akun;
+
+====================================================
+
+LEFT JOIN Query
+
+SELECT 
+bagan_akun.kode,
+bagan_akun.nama_akun,
+jurnal2019.debet,
+jurnal2019.kredit
+
+FROM bagan_akun LEFT JOIN jurnal2019 ON bagan_akun.kode = jurnal2019.kode_akun;
+
+====================================================
+
+RIGHT JOIN Query
+
+SELECT 
+bagan_akun.kode,
+bagan_akun.nama_akun,
+jurnal2019.debet,
+jurnal2019.kredit
+
+FROM bagan_akun RIGHT JOIN jurnal2019 ON bagan_akun.kode = jurnal2019.kode_akun;
+
+=====================================================
+
+SELECT * FROM `jurnal2019` WHERE keterangan = "saldo awal";
+
+=====================================================
+
+SELECT * FROM `bagan_akun` 
+WHERE 
+`nama_akun` LIKE "%gaji%" OR
+`nama_akun` LIKE "%tunjangan%";
+
+=====================================================
+
+SELECT * FROM `jurnal2019` WHERE `kode_akun` IN (62001, 62002);
+
+=====================================================
+
+Transaksi bulan januari without keterangan
+
+SELECT `tgl`, `no_bukti`, `kode_akun`, `debet`, `kredit` 
+FROM `jurnal2019` 
+WHERE
+tgl >= '2019-01-01' AND tgl <= '2019-01-31';
+
+=====================================================
+
+Memanggil data bulan ke- n tanpa tanggal
+
+SELECT * FROM `jurnal2019` WHERE month(tgl) = 1 AND keterangan != 'saldo awal';
+
+!= dapat diganti menjadi <>
+
+=====================================================
+
+BNI only and limit 100 rows
+
+SELECT 
+bagan_akun.kode, bagan_akun.nama_akun, jurnal2019.tgl, jurnal2019.no_bukti, jurnal2019.debet, jurnal2019.kredit, jurnal2019.keterangan
+
+FROM bagan_akun, jurnal2019
+
+WHERE 
+bagan_akun.nama_akun LIKE 'BANK BNI CAB Jakarta Pusat' LIMIT 100;
+
+=====================================================
+
+atau dapat menggunakan kode bank --
+
+SELECT 
+bagan_akun.kode, bagan_akun.nama_akun, jurnal2019.tgl, jurnal2019.no_bukti, jurnal2019.debet, jurnal2019.kredit, jurnal2019.keterangan
+
+FROM bagan_akun, jurnal2019
+
+WHERE 
+bagan_akun.kode = 11102 LIMIT 100;
+
+=====================================================
+
+MENGATUR FORMAT TANGGAL 
+
+SELECT 
+date_format(tgl, '%d %M %y') AS 'Tanggal',
+bagan_akun.kode, bagan_akun.nama_akun, jurnal2019.debet, jurnal2019.kredit
+
+FROM bagan_akun, jurnal2019
+
+WHERE
+bagan_akun.kode = 41001  
+ORDER BY `jurnal2019`.`kredit` ASC;
+
+=====================================================
+
+MENGETAHUI TRANSAKSI TERBESAR PADA BULAN BERAPA
+
+SELECT COUNT(jurnal2019.debet),
+DATE_FORMAT(jurnal2019.tgl,'%M') AS bulan
+
+FROM jurnal2019
+
+GROUP BY DATE_FORMAT(jurnal2019.tgl,'%M')
+ORDER BY COUNT(jurnal2019.debet) DESC;
+
+=====================================================
+
+MENGHITUNG TOTAL KREDIT
+
+SELECT CONCAT('Rp. ',FORMAT(SUM(jurnal2019.kredit),0)) AS 'Total Kredit'
+
+FROM jurnal2019
+
+=====================================================
+
+MENAMPILKAN TOTAL PENJUALAN PERBULAN DENGAN TOTAL
+PERBULAN DIBAWAH 100.000
+
+SELECT
+DATE_FORMAT(j.tgl,'%M') AS Bulan,
+ba.nama_akun,
+SUM(j.kredit) AS Kredit,
+j.keterangan
+
+FROM 
+bagan_akun AS ba,
+jurnal2019 AS j
+
+WHERE
+ba.kode = j.kode_akun AND
+ba.nama_akun LIKE 'penjualan'
+
+GROUP BY Bulan HAVING Kredit < 100000
+ORDER BY Kredit DESC
+
+===================================================
+
+SAMA SEPERTI DIATAS, NAMUN LEBIH RAPIH
+
+SELECT
+DATE_FORMAT(j.tgl,'%M') AS Bulan,
+ba.nama_akun,
+CONCAT('Rp. ',FORMAT(SUM(j.kredit),0)) AS Kredit,
+j.keterangan
+
+FROM 
+bagan_akun AS ba,
+jurnal2019 AS j
+
+WHERE
+ba.kode = j.kode_akun AND
+ba.nama_akun LIKE 'penjualan'
+
+GROUP BY Bulan HAVING Kredit < 100000
+ORDER BY Kredit DESC;
+
+===================================================
+
+MENAMPILKAN DATA ORDER BY KODE AKUN
+
+SELECT 
+jurnal2019.tgl AS 'Tanggal',
+COUNT(jurnal2019.kode_akun) AS 'Jumlah',
+jurnal2019.kode_akun AS 'Kode Akun'
+
+FROM jurnal2019
+
+WHERE jurnal2019.kode_akun = 11111;
+
+===================================================
+
+
+
